@@ -123,3 +123,27 @@ color: rgb(148, 139, 139);
   color: rgb(121, 121, 117);
 
 }
+
+button {
+  border: 1px solid #0066cc;
+  background-color: #0099cc;
+  color: #ffffff;
+  padding: 5px 10px;
+}
+
+button:hover {
+  border: 1px solid #0099cc;
+  background-color: #5bb4c5;
+  color: #ffffff;
+  padding: 5px 10px;
+  cursor: pointer;
+
+}
+
+button:disabled,
+button[disabled]{
+  border: 1px solid #050505;
+  background-color: #0c0909;
+  color: #666666;
+  cursor: auto;
+}

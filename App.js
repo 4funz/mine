@@ -8,32 +8,52 @@ class Mine extends Component {
 constructor(props) {
   super(props);
   this.state = { 
-    gold: 1000, 
+    gold: 450, 
     lumber: 1000,
     userLvl: 1, 
-    goldLvl: 1, 
-    lumberLvl: 1, 
-    mineProd: [1, 5, 10, 15, 20, 25, 30, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35],
-    mineUpgradeCostGold: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100],
-    mineUpgradeCostLumber: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100],
-    error: false
+    goldMine: {
+      goldCost: 60,
+      lumberCost: 150,
+      lvl: 1,
+      prod: 10,
+      upgradePossible: true,
+      costMod: 1.6,
+      baseProdMod: 1.2,
+      baseProd: 4,
+      src: '\public\img\Gold-Ingot-icon.png',
+      error: <h1>No errors!</h1>
 
+    },
+    lumberMine: {
+      goldCost: 25,
+      lumberCost: 100,
+      lvl: 1,
+      prod: 10,
+      upgradePossible: true,
+      costMod: 1.2,
+      baseProdMod: 1.6,
+      baseProd: 8,
+      src: '\public\img\Gold-Ingot-icon.png',
+      error: <h1>No errors!</h1>
+    },
 
-
+    error: false,
   
-  
+    
+
   }
-  this.upgradeGoldMine = this.upgradeGoldMine.bind(this)
-  this.upgradeLumberMine = this.upgradeLumberMine.bind(this)
+
+  this.upgradeMine = this.upgradeMine.bind(this)
   this.errorUpdate = this.errorUpdate.bind(this)
   this.clearError = this.clearError.bind(this)
   this.deleteLocalStorage = this.deleteLocalStorage.bind(this)
+  this.updateMine = this.updateMine.bind(this)
 
-  
+  this.upgradeGold = this.upgradeGold.bind(this)
+  this.upgradeLumber = this.upgradeLumber.bind(this)
+  this.upgradePossibleCheck = this.upgradePossibleCheck.bind(this)
+  this.upgradeCheck = this.upgradeCheck.bind(this)
  
-
-
-
 }
 
 
@@ -45,7 +65,7 @@ saveStateToLocalStorage() {
   }
 }
 
- hydrateStateWithLocalStorage() {
+hydrateStateWithLocalStorage() {
   // for all items in state
   for (let key in this.state) {
     // if the key exists in localStorage
@@ -73,11 +93,38 @@ deleteLocalStorage() {
   }
 
   this.setState({
-    gold: 1000,
+    gold: 450, 
     lumber: 1000,
-    userLvl: 1,
-    goldLvl: 1,
-    lumberLvl: 1,
+    userLvl: 1, 
+    goldMine: {
+      goldCost: 60,
+      lumberCost: 150,
+      lvl: 1,
+      prod: 10,
+      upgradePossible: true,
+      costMod: 1.6,
+      baseProdMod: 1.2,
+      baseProd: 4,
+      src: '\public\img\Gold-Ingot-icon.png',
+
+    },
+    lumberMine: {
+      goldCost: 25,
+      lumberCost: 100,
+      lvl: 1,
+      prod: 10,
+      upgradePossible: true,
+      costMod: 1.2,
+      baseProdMod: 1.6,
+      baseProd: 8,
+      src: '\public\img\Gold-Ingot-icon.png',
+
+    },
+
+    error: false,
+  
+    
+
 
 
   })
@@ -86,13 +133,12 @@ deleteLocalStorage() {
 
 componentDidMount() {
 
-  
   this.timerID = setInterval(
-    () => this.upgradePossible(),
+    () => this.upgradeCheck(),
     3000
   );
   this.timerID = setInterval(
-    () => this.productionMine(),
+    () => this.updateResources(),
     3000
   );
 
@@ -107,71 +153,124 @@ componentDidMount() {
 }
 
 
+upgradeCheck(){
+  this.upgradePossibleCheck('goldMine');
+  this.upgradePossibleCheck('lumberMine');
+
+}
+
+upgradePossibleCheck(type) {
+
+
+  if (this.state.gold < this.state[type].goldCost) {
+
+    let error = <h1>Not enough Gold!</h1>
+
+    let newObj = { ...this.state[type], upgradePossible: false, error: error }
+    this.setState({
+      [type]: newObj
+    })
+    
+
+  } else if (this.state.lumber < this.state[type].lumberCost) {
+ 
+    let error = <h1>Not enough Lumber!</h1>
+
+    let newObjOne = { ...this.state[type], upgradePossible: false, error: error }
+    this.setState({
+      [type]: newObjOne
+    })
+
+  
+  } else {
+
+    this.clearError;
+  }
+
+}
+
+
 
 componentWillUnmount() {
   clearInterval(this.timerID);
-  window.removeEventListener(
+  /* window.removeEventListener(
     "beforeunload",
     this.saveStateToLocalStorage.bind(this)
   );
 
   // saves if component has a chance to unmount
-  this.saveStateToLocalStorage(); 
+  this.saveStateToLocalStorage();  */
 
 }
 
-upgradeGoldMine() {
-if(this.state.gold > this.state.mineUpgradeCostGold[this.state.goldLvl + 1] && this.state.lumber > this.state.mineUpgradeCostLumber[this.state.goldLvl + 1]) {
-  this.setState({
-    goldLvl: this.state.goldLvl + 1,
-    gold: this.state.gold - this.state.mineUpgradeCostGold[this.state.goldLvl+1],
-    lumber: this.state.lumber -this.state.mineUpgradeCostLumber[this.state.goldLvl+1]
-  })
+upgradeGold(){
+  this.upgradeMine('goldMine')
+}
 
-  }
-  else {
+upgradeLumber(){
+  this.upgradeMine('lumberMine')
+}
+
+upgradeMine(type) {
+
+
+  if(this.state.gold >= this.state[type].goldCost  &&  this.state.lumber >= this.state[type].lumberCost ) {
+
+    this.setState({
+      
+      gold: this.state.gold - this.state[type].goldCost,
+      lumber: this.state.lumber - this.state[type].lumberCost,
+    })
+    let newObj = { ...this.state[type], lvl: this.state[type].lvl++ }
+    this.setState({
+      [type]: newObj
+      
+    })
+    
+ 
+    
+    this.updateMine(type)
+
+   } else {
 
     this.errorUpdate()
 
-  }
+  } 
+ 
 } 
 
-upgradeLumberMine() {
-  if(this.state.gold > this.state.mineUpgradeCostGold[this.state.lumberLvl + 1] && this.state.lumber > this.state.mineUpgradeCostLumber[this.state.lumberLvl + 1]) {
-    this.setState({
-      lumberLvl: this.state.lumberLvl + 1,
-      gold: this.state.gold - this.state.mineUpgradeCostGold[this.state.goldLvl+1],
-      lumber: this.state.lumber - this.state.mineUpgradeCostLumber[this.state.goldLvl+1]
-    })
+updateMine(type) {
 
-  }
-  else {
+  let currentLevel = this.state[type].lvl;
+  let prodBase = this.state[type].baseProd; 
+  let baseMod = this.state[type].baseProdMod
 
-    this.errorUpdate()
+  let cost =  Math.round((prodBase *  currentLevel  * baseMod))
+ 
+ 
+  let baseCostGold = this.state[type].goldCost;
+  let baseCostLumber = this.state[type].lumberCost;
+  let costMod = this.state[type].costMod;
 
-  }
+  let nextUpgradeCostGold =  Math.round( (currentLevel * baseCostGold  * costMod));
+  let nextUpgradeCostLumber =  Math.round( (currentLevel * baseCostLumber  * costMod)); 
 
-}
-
-
-upgradePossible(){
-if(this.state.gold > this.state.mineUpgradeCostGold[this.state.goldLvl + 1] && this.state.lumber > this.state.mineUpgradeCostLumber[this.state.goldLvl + 1]) {
-this.clearError();
-
-} else if (this.state.gold > this.state.mineUpgradeCostGold[this.state.lumberLvl + 1] && this.state.lumber > this.state.mineUpgradeCostLumber[this.state.lumberLvl + 1]) {
-  this.clearError();
-}
-
-}
-
-
-productionMine() {
+  let newObjOne = { ...this.state[type], goldCost: nextUpgradeCostGold, lumberCost: nextUpgradeCostLumber, prod: cost}
   this.setState({
-    gold: this.state.gold + this.state.mineProd[this.state.goldLvl],
-    lumber: this.state.lumber + (this.state.mineProd[this.state.lumberLvl] / 4) * (this.state.lumberLvl * 1.2)
+    [type]: newObjOne
+
   })
 }
+  
 
+updateResources(){
+  this.setState({
+    gold: this.state.gold + this.state.goldMine['prod'],
+    lumber: this.state.lumber + this.state.lumberMine['prod'],
+
+  })
+
+}
 
 errorUpdate(){
   this.setState({
@@ -186,7 +285,6 @@ clearError(){
   })
 }
 
-
 render() {
   let errorButton;
   if(this.state.error) {
@@ -194,26 +292,28 @@ render() {
     <h1>Not enough resources</h1>
     <button onClick={this.clearError}>Clear error</button>
     </div>
-  }
+  };
 
     return (
       <div id="wrapper">
-        <div id="gold">Gold <span id="resource-counter">{this.state.gold}</span></div>
-        <div id="lumber">Lumber <span id="resource-counter">{this.state.lumber}</span></div>
-        <div id="player">Player level <span id="resource-counter">{this.state.userLvl}</span> </div>
+       <div id="gold">Gold <span id="resource-counter">{this.state.gold}</span></div>
+      <div id="lumber">Lumber <span id="resource-counter">{this.state.lumber}</span></div>
+       <div id="player">Player level <span id="resource-counter">{this.state.userLvl}</span> </div> 
 
-        <div id="gold-mine">Mine level {this.state.goldLvl} | Production {this.state.mineProd[this.state.goldLvl]} </div>
-        <button id="gold-button" onClick={this.upgradeGoldMine}>Upgrade Gold</button>
+      <div id="gold-mine">Mine level {this.state.goldMine['lvl']} | Production {this.state.goldMine['prod']} </div>
+        <button id="gold-button"  onClick={this.upgradeGold}>Upgrade Gold -> {this.state.goldMine.goldCost} G | {this.state.goldMine.lumberCost} L</button>
 
-        <div id="lumber-mine">Mine level {this.state.lumberLvl} | Production {(this.state.mineProd[this.state.lumberLvl] / 4) * (this.state.lumberLvl * 1.2)}</div>
-        <button id="lumber-button" onClick={this.upgradeLumberMine}>Upgrade Lumber</button>
+
+        <div id="lumber-mine">Mine level {this.state.lumberMine.lvl} | Production {this.state.lumberMine.prod}</div>
+        <button id="lumber-button" /* disabled={this.state.lumberMine.upgradePossible} */ onClick={this.upgradeLumber}> Upgrade Lumber -> {this.state.lumberMine.goldCost} G | {this.state.lumberMine.lumberCost} L</button> 
+ 
         
         {errorButton}
                 
        <button id="new-game" onClick={this.deleteLocalStorage}>Start new game</button>
         
-
-        </div>
+ 
+      </div>
        
       
 
@@ -226,5 +326,4 @@ render() {
   }
 
 }
-
 export default Mine;
