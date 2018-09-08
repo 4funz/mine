@@ -14,6 +14,8 @@ constructor(props) {
     goldMine: {
       goldCost: 60,
       lumberCost: 150,
+      goldCostDelta: 0,
+      lumberCostDelta: 0,
       lvl: 1,
       prod: 10,
       upgradePossible: true,
@@ -27,6 +29,8 @@ constructor(props) {
     lumberMine: {
       goldCost: 25,
       lumberCost: 100,
+      goldCostDelta: 0,
+      lumberCostDelta: 0,
       lvl: 1,
       prod: 10,
       upgradePossible: true,
@@ -164,22 +168,26 @@ upgradePossibleCheck(type) {
 
   if (this.state.gold < this.state[type].goldCost) {
 
-    let error = <h1>Not enough Gold!</h1>
+    let goldDiff = this.state[type].goldCost - this.state.gold
 
-    let newObj = { ...this.state[type], upgradePossible: false, error: error }
+    let newObj = { ...this,state[type], upgradePossible: false, goldCostDelta: goldDiff}
     this.setState({
       [type]: newObj
     })
-    
 
-  } else if (this.state.lumber < this.state[type].lumberCost) {
+    this.upgradeCountdown(type)
+   
+
+  } if (this.state.lumber < this.state[type].lumberCost) {
  
-    let error = <h1>Not enough Lumber!</h1>
+    let lumberDiff = this.state[type].lumberCost - this.state.lumber
 
-    let newObjOne = { ...this.state[type], upgradePossible: false, error: error }
+    let newObj = { ...this,state[type], upgradePossible: false, goldCostDelta: goldDiff}
     this.setState({
-      [type]: newObjOne
+      [type]: newObj
     })
+
+    this.upgradeCountdown(type)
 
   
   } else {
@@ -189,7 +197,10 @@ upgradePossibleCheck(type) {
 
 }
 
+upgradeCountdown() {
 
+
+}
 
 componentWillUnmount() {
   clearInterval(this.timerID);
